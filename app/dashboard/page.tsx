@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardLayout } from "@/components/dashboard-layout"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Users, Calendar, UserCheck, Zap } from "lucide-react"
 import { supabaseService } from "@/lib/supabaseService"
 
@@ -16,54 +17,22 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        // Get current month start and end dates
-        const now = new Date()
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
-
-        // Load all data in parallel
-        const [members, services, visitors, attendance] = await Promise.all([
-          supabaseService.getMembers(),
-          supabaseService.getServices(),
-          supabaseService.getVisitors(),
-          supabaseService.getAttendance(),
+        // Load only counts and filtered data - much faster!
+        const [totalMembersCount, servicesThisMonthCount, visitorsThisMonthCount, uniqueAttendeesCount] = await Promise.all([
+          supabaseService.getMembersCount(),
+          supabaseService.getServicesThisMonth(),
+          supabaseService.getVisitorsThisMonth(),
+          supabaseService.getUniqueAttendeesThisMonth(),
         ])
 
-        // Set total members
-        setTotalMembers(members.length)
+        setTotalMembers(totalMembersCount)
+        setServicesThisMonth(servicesThisMonthCount)
+        setVisitorsThisMonth(visitorsThisMonthCount)
 
-        // Filter services for this month
-        const servicesInMonth = services.filter((service: any) => {
-          const serviceDate = new Date(service.started_at)
-          return serviceDate >= monthStart && serviceDate <= monthEnd
-        })
-        setServicesThisMonth(servicesInMonth.length)
-
-        // Filter visitors for this month
-        const visitorsInMonth = visitors.filter((visitor: any) => {
-          if (!visitor.created_at) return false
-          const visitorDate = new Date(visitor.created_at)
-          return visitorDate >= monthStart && visitorDate <= monthEnd
-        })
-        setVisitorsThisMonth(visitorsInMonth.length)
-
-        // Calculate attendance rate
-        // Attendance rate = (Unique people who attended this month / Total members) * 100
-        // This shows what percentage of members attended at least one service this month
-        const attendanceThisMonth = attendance.filter((a: any) => {
-          if (!a.checked_in_at) return false
-          const attendanceDate = new Date(a.checked_in_at)
-          return attendanceDate >= monthStart && attendanceDate <= monthEnd
-        })
-        
-        // Get unique attendees (visitor_id) from this month's attendance
-        const uniqueAttendees = new Set(attendanceThisMonth.map((a: any) => a.visitor_id))
-        
-        // Calculate rate: (unique attendees this month / total members) * 100
-        // This represents what % of members attended at least one service
-        const attendanceRateValue = members.length > 0 
-          ? Math.min(100, Math.round((uniqueAttendees.size / members.length) * 100))
-          : uniqueAttendees.size > 0 ? 100 : 0
+        // Calculate attendance rate: (unique attendees this month / total members) * 100
+        const attendanceRateValue = totalMembersCount > 0 
+          ? Math.min(100, Math.round((uniqueAttendeesCount / totalMembersCount) * 100))
+          : uniqueAttendeesCount > 0 ? 100 : 0
         setAttendanceRate(attendanceRateValue)
       } catch (error) {
         console.error("Error loading dashboard data:", error)
@@ -134,9 +103,18 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-end justify-between">
-                    <div>
-                      <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+                    <div className="flex-1">
+                      {loading ? (
+                        <>
+                          <Skeleton className="h-8 w-20 mb-2" />
+                          <Skeleton className="h-4 w-24" />
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+                        </>
+                      )}
                     </div>
                     <div className={`${stat.color} p-3 rounded-lg`}>
                       <Icon className={`w-6 h-6 ${stat.iconColor}`} />

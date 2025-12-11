@@ -18,6 +18,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { Skeleton } from "@/components/ui/skeleton"
 import { supabaseService, type Visitor, type Service } from "@/lib/supabaseService"
 
 export default function AttendancePage() {
@@ -30,9 +31,12 @@ export default function AttendancePage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    loadAttendance()
-    loadVisitors()
-    loadServices()
+    // Load all data in parallel for better performance
+    Promise.all([
+      loadAttendance(),
+      loadVisitors(),
+      loadServices(),
+    ])
   }, [])
 
   const loadAttendance = async () => {
@@ -171,11 +175,27 @@ export default function AttendancePage() {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-muted-foreground">
-                        Loading attendance...
-                      </td>
-                    </tr>
+                    <>
+                      {[...Array(5)].map((_, i) => (
+                        <tr key={i} className="border-b border-border">
+                          <td className="py-3 px-4">
+                            <Skeleton className="h-5 w-32" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <Skeleton className="h-5 w-28" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <Skeleton className="h-5 w-24" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <Skeleton className="h-6 w-20 rounded-full" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <Skeleton className="h-8 w-8 mx-auto rounded" />
+                          </td>
+                        </tr>
+                      ))}
+                    </>
                   ) : filteredAttendance.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-8 text-center text-muted-foreground">

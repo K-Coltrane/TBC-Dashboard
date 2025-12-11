@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AddMemberModal } from "@/components/add-member-modal"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { Skeleton } from "@/components/ui/skeleton"
 import { supabaseService, type Member } from "@/lib/supabaseService"
 
 export default function MembersPage() {
@@ -197,11 +198,33 @@ export default function MembersPage() {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr>
-                      <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                        Loading members...
-                      </td>
-                    </tr>
+                    <>
+                      {[...Array(5)].map((_, i) => (
+                        <tr key={i} className="border-b border-border">
+                          <td className="py-3 px-2 md:px-4">
+                            <Skeleton className="h-5 w-32" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden sm:table-cell">
+                            <Skeleton className="h-5 w-40" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden md:table-cell">
+                            <Skeleton className="h-5 w-28" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden lg:table-cell">
+                            <Skeleton className="h-5 w-24" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden md:table-cell">
+                            <Skeleton className="h-5 w-32" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4">
+                            <Skeleton className="h-6 w-16 rounded-full" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4">
+                            <Skeleton className="h-8 w-8 mx-auto rounded" />
+                          </td>
+                        </tr>
+                      ))}
+                    </>
                   ) : filteredMembers.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-8 text-center text-muted-foreground">

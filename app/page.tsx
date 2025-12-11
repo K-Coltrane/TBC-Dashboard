@@ -61,8 +61,8 @@ export default function LoginPage() {
       localStorage.setItem("isAuthenticated", "true")
       localStorage.setItem("userName", user.name)
 
-      // Redirect to dashboard
-      router.push("/dashboard")
+      // Redirect to dashboard using window.location for reliability
+      window.location.href = "/dashboard"
     } catch (err) {
       setError("Login failed. Please try again.")
       setLoading(false)

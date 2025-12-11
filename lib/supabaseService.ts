@@ -117,14 +117,44 @@ export class SupabaseService {
   }
 
   // ==================== VISITORS ====================
-  async getVisitors(): Promise<Visitor[]> {
-    const { data, error } = await supabase
+  async getVisitors(limit?: number): Promise<Visitor[]> {
+    let query = supabase
       .from('visitors')
       .select('*')
       .order('created_at', { ascending: false })
+    
+    if (limit) {
+      query = query.limit(limit)
+    }
+    
+    const { data, error } = await query
 
     if (error) throw error
     return data || []
+  }
+
+  async getVisitorsCount(): Promise<number> {
+    const { count, error } = await supabase
+      .from('visitors')
+      .select('*', { count: 'exact', head: true })
+
+    if (error) throw error
+    return count || 0
+  }
+
+  async getVisitorsThisMonth(): Promise<number> {
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
+    
+    const { count, error } = await supabase
+      .from('visitors')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', monthStart)
+      .lte('created_at', monthEnd)
+
+    if (error) throw error
+    return count || 0
   }
 
   async addVisitor(visitor: {
@@ -162,14 +192,35 @@ export class SupabaseService {
   }
 
   // ==================== SERVICES ====================
-  async getServices(): Promise<Service[]> {
-    const { data, error } = await supabase
+  async getServices(limit?: number): Promise<Service[]> {
+    let query = supabase
       .from('services')
       .select('*, service_types(name)')
       .order('started_at', { ascending: false })
+    
+    if (limit) {
+      query = query.limit(limit)
+    }
+    
+    const { data, error } = await query
 
     if (error) throw error
     return data || []
+  }
+
+  async getServicesThisMonth(): Promise<number> {
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
+    
+    const { count, error } = await supabase
+      .from('services')
+      .select('*', { count: 'exact', head: true })
+      .gte('started_at', monthStart)
+      .lte('started_at', monthEnd)
+
+    if (error) throw error
+    return count || 0
   }
 
   async addService(service: {
@@ -244,8 +295,8 @@ export class SupabaseService {
   }
 
   // ==================== ATTENDANCE ====================
-  async getAttendance(): Promise<any[]> {
-    const { data, error } = await supabase
+  async getAttendance(limit?: number): Promise<any[]> {
+    let query = supabase
       .from('attendance')
       .select(
         `
@@ -255,9 +306,33 @@ export class SupabaseService {
       `
       )
       .order('checked_in_at', { ascending: false })
+    
+    if (limit) {
+      query = query.limit(limit)
+    }
+    
+    const { data, error } = await query
 
     if (error) throw error
     return data || []
+  }
+
+  async getUniqueAttendeesThisMonth(): Promise<number> {
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
+    
+    const { data, error } = await supabase
+      .from('attendance')
+      .select('visitor_id')
+      .gte('checked_in_at', monthStart)
+      .lte('checked_in_at', monthEnd)
+
+    if (error) throw error
+    
+    // Get unique visitor_ids
+    const uniqueAttendees = new Set(data?.map((a: any) => a.visitor_id) || [])
+    return uniqueAttendees.size
   }
 
   async addAttendance(attendance: {
@@ -293,11 +368,17 @@ export class SupabaseService {
   }
 
   // ==================== MEMBERS ====================
-  async getMembers(): Promise<Member[]> {
-    const { data, error } = await supabase
+  async getMembers(limit?: number): Promise<Member[]> {
+    let query = supabase
       .from('members')
       .select('*')
       .order('created_at', { ascending: false })
+    
+    if (limit) {
+      query = query.limit(limit)
+    }
+    
+    const { data, error } = await query
 
     if (error) {
       console.error("Error fetching members:", error)
@@ -319,6 +400,15 @@ export class SupabaseService {
     }
     
     return data || []
+  }
+
+  async getMembersCount(): Promise<number> {
+    const { count, error } = await supabase
+      .from('members')
+      .select('*', { count: 'exact', head: true })
+
+    if (error) throw error
+    return count || 0
   }
   
   async getMemberById(id: number): Promise<Member> {

@@ -18,7 +18,23 @@ import {
 import { Label } from "@/components/ui/label"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { AddVisitorModal } from "@/components/add-visitor-modal"
+import { Skeleton } from "@/components/ui/skeleton"
 import { supabaseService, type Visitor } from "@/lib/supabaseService"
+
+// Helper function to format dates consistently (prevents hydration errors)
+const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return "N/A"
+  try {
+    const date = new Date(dateString)
+    // Use a consistent format that doesn't depend on locale
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${month}/${day}/${year}`
+  } catch {
+    return "N/A"
+  }
+}
 
 export default function VisitorsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -186,7 +202,7 @@ export default function VisitorsPage() {
       
       console.log("Table access test passed, proceeding with insert...")
       
-      // Add to members table
+      // Step 1: Add to members table
       const member = await supabaseService.addMember({
         first_name: visitor.first_name,
         last_name: visitor.last_name,
@@ -199,15 +215,35 @@ export default function VisitorsPage() {
 
       console.log("Member created successfully:", member)
 
-      // Only delete visitor if member was successfully created
-      if (member && member.id) {
-        await supabaseService.deleteVisitor(visitor.id)
-        // Reload visitors list
-        await loadVisitors()
-        alert(`${visitor.first_name} ${visitor.last_name} has been promoted to member successfully!`)
-      } else {
+      // Step 2: Verify member was created successfully
+      if (!member || !member.id) {
         throw new Error("Failed to create member record - no ID returned")
       }
+
+      // Step 3: Delete visitor from visitors table
+      // This MUST happen after member is created to ensure data integrity
+      try {
+        await supabaseService.deleteVisitor(visitor.id)
+        console.log(`Visitor ${visitor.id} deleted successfully`)
+      } catch (deleteError) {
+        // If deletion fails, we need to handle this carefully
+        console.error("Error deleting visitor after promotion:", deleteError)
+        // Show warning but still consider promotion successful since member was created
+        alert(
+          `${visitor.first_name} ${visitor.last_name} has been added to members successfully!\n\n` +
+          `Warning: The visitor record could not be automatically removed. ` +
+          `Please manually delete the visitor record to avoid duplicates.`
+        )
+        setPromotingVisitorId(null)
+        await loadVisitors()
+        return // Exit early since we've shown the warning
+      }
+
+      // Step 4: Reload visitors list to reflect the change
+      await loadVisitors()
+      
+      // Step 5: Show success message
+      alert(`${visitor.first_name} ${visitor.last_name} has been promoted to member successfully!`)
       
       // Reset promoting flag after successful promotion
       setPromotingVisitorId(null)
@@ -356,11 +392,33 @@ export default function VisitorsPage() {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr>
-                      <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                        Loading visitors...
-                      </td>
-                    </tr>
+                    <>
+                      {[...Array(5)].map((_, i) => (
+                        <tr key={i} className="border-b border-border">
+                          <td className="py-3 px-2 md:px-4">
+                            <Skeleton className="h-5 w-32" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden sm:table-cell">
+                            <Skeleton className="h-5 w-40" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden md:table-cell">
+                            <Skeleton className="h-5 w-28" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden lg:table-cell">
+                            <Skeleton className="h-5 w-24" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden md:table-cell">
+                            <Skeleton className="h-5 w-32" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4 hidden lg:table-cell">
+                            <Skeleton className="h-5 w-24" />
+                          </td>
+                          <td className="py-3 px-2 md:px-4">
+                            <Skeleton className="h-8 w-8 mx-auto rounded" />
+                          </td>
+                        </tr>
+                      ))}
+                    </>
                   ) : filteredVisitors.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-8 text-center text-muted-foreground">
@@ -386,7 +444,7 @@ export default function VisitorsPage() {
                           {visitor.inviter_name || "N/A"}
                         </td>
                         <td className="py-3 px-2 md:px-4 text-foreground hidden lg:table-cell text-xs md:text-sm">
-                          {visitor.created_at ? new Date(visitor.created_at).toLocaleDateString() : "N/A"}
+                          {formatDate(visitor.created_at)}
                         </td>
                       <td className="py-3 px-2 md:px-4">
                         <DropdownMenu>
