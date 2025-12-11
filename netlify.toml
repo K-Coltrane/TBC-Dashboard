@@ -1,4 +1,7 @@
 [build]
+  # Base directory: Leave empty if your Next.js app is at the repository root
+  # If your app is in a subdirectory, set it here (e.g., base = "church/TBC-Dashboard")
+  base = ""
   command = "npm run build"
   # Publish directory is handled automatically by @netlify/plugin-nextjs
 
@@ -6,6 +9,6 @@
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20.9.0"
   NPM_FLAGS = "--legacy-peer-deps"
 
