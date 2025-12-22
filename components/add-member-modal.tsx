@@ -94,7 +94,6 @@ export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberMod
             />
           </div>
 
-
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
