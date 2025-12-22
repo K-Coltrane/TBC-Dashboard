@@ -48,8 +48,8 @@ export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberMod
   }
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.phone || !formData.location || !formData.department) {
-      alert("Please fill in all fields")
+    if (!formData.name) {
+      alert("Please enter the member's name")
       return
     }
     onAddMember(formData)
