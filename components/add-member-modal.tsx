@@ -21,6 +21,7 @@ interface AddMemberModalProps {
   onOpenChange: (open: boolean) => void
   onAddMember: (member: {
     name: string
+    dob: string
     email: string
     phone: string
     location: string
@@ -32,6 +33,7 @@ interface AddMemberModalProps {
 export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberModalProps) {
   const [formData, setFormData] = useState({
     name: "",
+    dob : '',
     email: "",
     phone: "",
     location: "",
@@ -56,6 +58,7 @@ export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberMod
     onAddMember(formData)
     setFormData({
       name: "",
+      dob: '',
       email: "",
       phone: "",
       location: "",
@@ -78,6 +81,19 @@ export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberMod
             <Label htmlFor="name">Name</Label>
             <Input id="name" name="name" placeholder="Full name" value={formData.name} onChange={handleInputChange} />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dob">Date of Birth</Label>
+            <Input
+              id="dob"
+              name="dob"
+              type="date"
+              placeholder="Date of birth"
+              value={formData.dob}
+              onChange={handleInputChange}
+            />
+          </div>
+
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
