@@ -196,7 +196,7 @@ export default function MembersPage() {
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
                     <th className="text-left py-3 px-2 md:px-4 font-semibold text-muted-foreground">Name</th>
-                    <th className="text-left py-3 px-2 md:px-4 font-semibold text-muted-foreground hidden md:table-cell">
+                    <th className="text-left py-3 px-2 md:px-4 font-semibold text-muted-foreground hidden sm:table-cell">
                       Date of Birth
                     </th>
                     <th className="text-left py-3 px-2 md:px-4 font-semibold text-muted-foreground hidden sm:table-cell">
@@ -223,7 +223,7 @@ export default function MembersPage() {
                           <td className="py-3 px-2 md:px-4">
                             <Skeleton className="h-5 w-32" />
                           </td>
-                          <td className="py-3 px-2 md:px-4 hidden md:table-cell">
+                          <td className="py-3 px-2 md:px-4 hidden sm:table-cell">
                             <Skeleton className="h-5 w-24" />
                           </td>
                           <td className="py-3 px-2 md:px-4 hidden sm:table-cell">
@@ -259,7 +259,7 @@ export default function MembersPage() {
                         <td className="py-3 px-2 md:px-4 text-foreground font-medium text-sm md:text-base">
                           {member.first_name} {member.last_name}
                         </td>
-                        <td className="py-3 px-2 md:px-4 text-foreground hidden md:table-cell text-xs md:text-sm">
+                        <td className="py-3 px-2 md:px-4 text-foreground hidden sm:table-cell text-xs md:text-sm">
                           {formatDate(member.dob)}
                         </td>
                       <td className="py-3 px-2 md:px-4 text-foreground hidden sm:table-cell text-xs md:text-sm">
