@@ -22,6 +22,7 @@ interface AddVisitorModalProps {
     name: string
     email: string
     phone: string
+    location: string
     invitedBy: string
   }) => void
 }
@@ -31,6 +32,7 @@ export function AddVisitorModal({ open, onOpenChange, onAddVisitor }: AddVisitor
     name: "",
     email: "",
     phone: "",
+    location: "",
     invitedBy: "",
   })
 
@@ -49,6 +51,7 @@ export function AddVisitorModal({ open, onOpenChange, onAddVisitor }: AddVisitor
       name: "",
       email: "",
       phone: "",
+      location: "",
       invitedBy: "",
     })
     onOpenChange(false)
@@ -87,6 +90,17 @@ export function AddVisitorModal({ open, onOpenChange, onAddVisitor }: AddVisitor
               name="phone"
               placeholder="Phone number"
               value={formData.phone}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              name="location"
+              placeholder="City or area"
+              value={formData.location}
               onChange={handleInputChange}
             />
           </div>
