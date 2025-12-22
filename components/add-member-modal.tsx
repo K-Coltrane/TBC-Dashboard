@@ -21,7 +21,7 @@ interface AddMemberModalProps {
   onOpenChange: (open: boolean) => void
   onAddMember: (member: {
     name: string
-    email: string
+  
     phone: string
     location: string
     department: string
@@ -32,7 +32,6 @@ interface AddMemberModalProps {
 export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberModalProps) {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
     phone: "",
     location: "",
     department: "",
@@ -49,14 +48,13 @@ export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberMod
   }
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.email || !formData.phone || !formData.location || !formData.department) {
+    if (!formData.name || !formData.phone || !formData.location || !formData.department) {
       alert("Please fill in all fields")
       return
     }
     onAddMember(formData)
     setFormData({
       name: "",
-      email: "",
       phone: "",
       location: "",
       department: "",
@@ -79,17 +77,7 @@ export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberMod
             <Input id="name" name="name" placeholder="Full name" value={formData.name} onChange={handleInputChange} />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Email address"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
-          </div>
+         
 
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
@@ -120,12 +108,33 @@ export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberMod
                 <SelectValue placeholder="Select department" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Worship Team">Worship Team</SelectItem>
-                <SelectItem value="Youth Ministry">Youth Ministry</SelectItem>
-                <SelectItem value="Ushers">Ushers</SelectItem>
-                <SelectItem value="Pastoral Team">Pastoral Team</SelectItem>
-                <SelectItem value="Administration">Administration</SelectItem>
+                <SelectItem value="Auditorium">Auditorium</SelectItem>
+                <SelectItem value="Baccenta ">Baccenta</SelectItem>
+                <SelectItem value="Billboards&Posters">Billboards & Posters</SelectItem>
+                <SelectItem value="Camera">Camera</SelectItem>
+                <SelectItem value="Camp">Camp</SelectItem>
+                <SelectItem value="Database">Database</SelectItem>
+                <SelectItem value="Dispenser">Dispenser</SelectItem>
+                <SelectItem value="ECG">ECG</SelectItem>
+                <SelectItem value="Editorial Board">Editorial Board</SelectItem>
+                <SelectItem value="Evangelism">Evangelism</SelectItem>
+                <SelectItem value="Event Co-ordination">Event Co-ordination</SelectItem>
+                <SelectItem value="First Timers ">First Timers</SelectItem>
+                <SelectItem value="Live Streaming">Live Streaming</SelectItem>
+                <SelectItem value="Media Production">Media Production</SelectItem>
+                <SelectItem value="Music">Music</SelectItem>
+                <SelectItem value="Offering">Offering</SelectItem>
                 <SelectItem value="Outreach">Outreach</SelectItem>
+                <SelectItem value="Prayer">Prayer</SelectItem>
+                <SelectItem value="Program Outline">Program Outline</SelectItem>
+                <SelectItem value="Protocol ">Protocol </SelectItem>
+                <SelectItem value="Retention">Retention</SelectItem>
+                <SelectItem value="Scent Management">Scent Management</SelectItem>
+                <SelectItem value="Social Media">Social Media</SelectItem>
+                <SelectItem value="Special Events">Special Events</SelectItem>
+                <SelectItem value="Storeroom">Storeroom</SelectItem>
+                <SelectItem value="Tithing">Tithing</SelectItem>
+                <SelectItem value="Washroom">Washroom</SelectItem>
               </SelectContent>
             </Select>
           </div>
