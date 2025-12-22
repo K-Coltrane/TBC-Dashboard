@@ -39,6 +39,7 @@ export interface Member {
   id: number
   first_name: string
   last_name: string
+  dob?: string
   email?: string
   phone?: string
   location?: string
@@ -436,6 +437,7 @@ export class SupabaseService {
   async addMember(member: {
     first_name: string
     last_name: string
+    dob?: string
     email?: string
     phone?: string
     location?: string
@@ -449,6 +451,7 @@ export class SupabaseService {
     
     const insertData: any = {
       name: fullName, // Table has 'name' column, not 'first_name'/'last_name'
+      dob: member.dob || null,
       email: member.email || null,
       phone: member.phone || null,
       location: member.location || null,

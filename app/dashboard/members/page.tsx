@@ -22,6 +22,20 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { supabaseService, type Member } from "@/lib/supabaseService"
 
+// Helper function to format dates consistently
+const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return "N/A"
+  try {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${month}/${day}/${year}`
+  } catch {
+    return "N/A"
+  }
+}
+
 export default function MembersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState<number | null>(null)
@@ -49,6 +63,7 @@ export default function MembersPage() {
 
   const handleAddMember = async (newMember: {
     name: string
+    dob: string
     email: string
     phone: string
     location: string
@@ -61,6 +76,7 @@ export default function MembersPage() {
       const result = await supabaseService.addMember({
         first_name: firstName,
         last_name: lastName,
+        dob: newMember.dob || undefined,
         email: newMember.email,
         phone: newMember.phone,
         location: newMember.location,
@@ -180,6 +196,9 @@ export default function MembersPage() {
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
                     <th className="text-left py-3 px-2 md:px-4 font-semibold text-muted-foreground">Name</th>
+                    <th className="text-left py-3 px-2 md:px-4 font-semibold text-muted-foreground hidden md:table-cell">
+                      Date of Birth
+                    </th>
                     <th className="text-left py-3 px-2 md:px-4 font-semibold text-muted-foreground hidden sm:table-cell">
                       Email
                     </th>
@@ -204,6 +223,9 @@ export default function MembersPage() {
                           <td className="py-3 px-2 md:px-4">
                             <Skeleton className="h-5 w-32" />
                           </td>
+                          <td className="py-3 px-2 md:px-4 hidden md:table-cell">
+                            <Skeleton className="h-5 w-24" />
+                          </td>
                           <td className="py-3 px-2 md:px-4 hidden sm:table-cell">
                             <Skeleton className="h-5 w-40" />
                           </td>
@@ -227,7 +249,7 @@ export default function MembersPage() {
                     </>
                   ) : filteredMembers.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                      <td colSpan={8} className="py-8 text-center text-muted-foreground">
                         No members found
                       </td>
                     </tr>
@@ -236,6 +258,9 @@ export default function MembersPage() {
                       <tr key={member.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                         <td className="py-3 px-2 md:px-4 text-foreground font-medium text-sm md:text-base">
                           {member.first_name} {member.last_name}
+                        </td>
+                        <td className="py-3 px-2 md:px-4 text-foreground hidden md:table-cell text-xs md:text-sm">
+                          {formatDate(member.dob)}
                         </td>
                       <td className="py-3 px-2 md:px-4 text-foreground hidden sm:table-cell text-xs md:text-sm">
                         {member.email}
@@ -306,7 +331,7 @@ export default function MembersPage() {
         open={!!deletingMember}
         onOpenChange={(open) => !open && setDeletingMember(null)}
         onConfirm={handleConfirmDelete}
-        itemName={deletingMemberData?.name || ""}
+        itemName={deletingMemberData ? `${deletingMemberData.first_name} ${deletingMemberData.last_name}` : ""}
         itemType="member"
       />
     </DashboardLayout>
