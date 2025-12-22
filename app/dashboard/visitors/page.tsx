@@ -44,6 +44,8 @@ export default function VisitorsPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [promotingVisitorId, setPromotingVisitorId] = useState<number | null>(null)
+  const [showPromoteDialog, setShowPromoteDialog] = useState(false)
+  const [visitorToPromote, setVisitorToPromote] = useState<Visitor | null>(null)
 
   useEffect(() => {
     loadVisitors()
@@ -135,7 +137,7 @@ export default function VisitorsPage() {
     }
   }
 
-  const handlePromote = async (id: number) => {
+  const handlePromote = (id: number) => {
     // Prevent multiple promotions at once
     if (promotingVisitorId !== null) {
       console.log("Promotion already in progress, ignoring duplicate click")
@@ -148,15 +150,19 @@ export default function VisitorsPage() {
       return
     }
 
-    // Set promoting flag immediately to prevent duplicate clicks
-    setPromotingVisitorId(id)
+    // Show confirmation dialog
+    setVisitorToPromote(visitor)
+    setShowPromoteDialog(true)
+  }
 
-    if (confirm(`Promote ${visitor.first_name} ${visitor.last_name} to member? This will move them from visitors to members.`)) {
-      await promoteVisitorToMember(visitor)
-    } else {
-      // User cancelled, reset the flag
-      setPromotingVisitorId(null)
-    }
+  const handleConfirmPromote = async () => {
+    if (!visitorToPromote) return
+    
+    // Set promoting flag immediately to prevent duplicate clicks
+    setPromotingVisitorId(visitorToPromote.id)
+    setShowPromoteDialog(false)
+    
+    await promoteVisitorToMember(visitorToPromote)
   }
 
   const promoteVisitorToMember = async (visitor: Visitor) => {
@@ -197,6 +203,8 @@ export default function VisitorsPage() {
         } else {
           alert(`Cannot access members table: ${testResult.error}\n\nPlease check:\n1. The 'members' table exists in Supabase\n2. Row Level Security (RLS) allows INSERT operations\n3. The anon key has proper permissions`)
         }
+        setPromotingVisitorId(null)
+        setVisitorToPromote(null)
         return
       }
       
@@ -225,18 +233,26 @@ export default function VisitorsPage() {
       try {
         await supabaseService.deleteVisitor(visitor.id)
         console.log(`Visitor ${visitor.id} deleted successfully`)
-      } catch (deleteError) {
+      } catch (deleteError: any) {
         // If deletion fails, we need to handle this carefully
         console.error("Error deleting visitor after promotion:", deleteError)
-        // Show warning but still consider promotion successful since member was created
-        alert(
-          `${visitor.first_name} ${visitor.last_name} has been added to members successfully!\n\n` +
-          `Warning: The visitor record could not be automatically removed. ` +
-          `Please manually delete the visitor record to avoid duplicates.`
-        )
-        setPromotingVisitorId(null)
-        await loadVisitors()
-        return // Exit early since we've shown the warning
+        // Try to delete again - sometimes it's a transient error
+        try {
+          await supabaseService.deleteVisitor(visitor.id)
+          console.log(`Visitor ${visitor.id} deleted on retry`)
+        } catch (retryError) {
+          // If deletion still fails, show warning but still consider promotion successful since member was created
+          console.error("Error deleting visitor on retry:", retryError)
+          alert(
+            `${visitor.first_name} ${visitor.last_name} has been added to members successfully!\n\n` +
+            `Warning: The visitor record could not be automatically removed. ` +
+            `Please manually delete the visitor record to avoid duplicates.`
+          )
+          setPromotingVisitorId(null)
+          setVisitorToPromote(null)
+          await loadVisitors()
+          return // Exit early since we've shown the warning
+        }
       }
 
       // Step 4: Reload visitors list to reflect the change
@@ -245,8 +261,9 @@ export default function VisitorsPage() {
       // Step 5: Show success message
       alert(`${visitor.first_name} ${visitor.last_name} has been promoted to member successfully!`)
       
-      // Reset promoting flag after successful promotion
+      // Reset promoting flag and visitor after successful promotion
       setPromotingVisitorId(null)
+      setVisitorToPromote(null)
     } catch (error: any) {
       console.error("=== ERROR PROMOTING VISITOR ===")
       console.error("Error type:", typeof error)
@@ -317,8 +334,9 @@ export default function VisitorsPage() {
         alert(`Failed to promote visitor to member:\n\n${fullError}\n\nPlease check the browser console (F12) for more details.`)
       }
       
-      // Reset promoting flag on error
+      // Reset promoting flag and visitor on error
       setPromotingVisitorId(null)
+      setVisitorToPromote(null)
     }
   }
 
@@ -513,9 +531,34 @@ export default function VisitorsPage() {
         open={!!deletingVisitor}
         onOpenChange={(open) => !open && setDeletingVisitor(null)}
         onConfirm={handleConfirmDelete}
-        itemName={deletingVisitorData?.name || ""}
+        itemName={deletingVisitorData ? `${deletingVisitorData.first_name} ${deletingVisitorData.last_name}` : ""}
         itemType="visitor"
       />
+
+      {/* Promote to Member Confirmation Dialog */}
+      <Dialog open={showPromoteDialog} onOpenChange={(open) => {
+        setShowPromoteDialog(open)
+        if (!open) {
+          setVisitorToPromote(null)
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Promote to Member</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to promote {visitorToPromote ? `${visitorToPromote.first_name} ${visitorToPromote.last_name}` : "this visitor"} to member? This will move them from visitors to members.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPromoteDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmPromote}>
+              Promote to Member
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Visitor Modal */}
       <AddVisitorModal open={isModalOpen} onOpenChange={setIsModalOpen} onAddVisitor={handleAddVisitor} />
