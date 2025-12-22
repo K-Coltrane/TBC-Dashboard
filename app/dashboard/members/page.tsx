@@ -105,6 +105,7 @@ export default function MembersPage() {
 
   const handleSaveEdit = async (updatedMember: {
     name: string
+    dob: string
     email: string
     phone: string
     location: string
@@ -118,6 +119,7 @@ export default function MembersPage() {
         await supabaseService.updateMember(editingMember, {
           first_name: firstName,
           last_name: lastName,
+          dob: updatedMember.dob || undefined,
           email: updatedMember.email,
           phone: updatedMember.phone,
           location: updatedMember.location,
@@ -348,10 +350,11 @@ function EditMemberDialog({
   member: Member
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (member: { name: string; email: string; phone: string; location: string; department: string; status: string }) => void
+  onSave: (member: { name: string; dob: string; email: string; phone: string; location: string; department: string; status: string }) => void
 }) {
   const [formData, setFormData] = useState({
     name: `${member.first_name} ${member.last_name}`,
+    dob: member.dob || "",
     email: member.email || "",
     phone: member.phone || "",
     location: member.location || "",
@@ -362,6 +365,7 @@ function EditMemberDialog({
   useEffect(() => {
     setFormData({
       name: `${member.first_name} ${member.last_name}`,
+      dob: member.dob || "",
       email: member.email || "",
       phone: member.phone || "",
       location: member.location || "",
@@ -399,6 +403,18 @@ function EditMemberDialog({
           <div className="space-y-2">
             <Label htmlFor="edit-name">Name</Label>
             <Input id="edit-name" name="name" placeholder="Full name" value={formData.name} onChange={handleInputChange} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-dob">Date of Birth</Label>
+            <Input
+              id="edit-dob"
+              name="dob"
+              type="date"
+              placeholder="Date of birth"
+              value={formData.dob}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="space-y-2">
