@@ -76,7 +76,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="flex min-h-screen bg-slate-900">
       {/* Left Section - Visual / Promotional (40-45%) */}
       <div className="hidden lg:flex lg:w-[42%] xl:w-[45%] flex-col relative overflow-hidden rounded-r-3xl">
         {backgroundImages.map((src, i) => (
@@ -92,11 +92,11 @@ export default function LoginPage() {
             sizes="45vw"
           />
         ))}
-        <div className="absolute inset-0 bg-blue-950/40" />
+        <div className="absolute inset-0 bg-slate-900/50" />
 
         <div className="relative z-10 flex flex-col flex-1 p-8">
           <div className="flex items-center">
-            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white/10 backdrop-blur-sm shrink-0">
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-800/60 ring-1 ring-slate-600 shrink-0">
               <Image
                 src="/Logo.jpg"
                 alt="Logo"
@@ -131,20 +131,20 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Section - Login Form (55-60%) */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 lg:px-16 xl:px-24 py-12 bg-gradient-to-b from-white from-0% via-blue-50/50 via-50% to-blue-100/70 to-100% lg:-ml-8 lg:rounded-l-3xl lg:min-w-0">
-        <div className="w-full max-w-[360px] mx-auto text-center text-slate-900">
-          <h1 className="text-3xl font-semibold mb-8 tracking-tight">Login</h1>
+      {/* Right Section - Login Form (55-60%) - matches sidebar/nav color scheme */}
+      <div className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 lg:px-16 xl:px-24 py-12 bg-slate-900/98 backdrop-blur-sm border-l border-slate-700/50 lg:-ml-8 lg:rounded-l-3xl lg:min-w-0">
+        <div className="w-full max-w-[360px] mx-auto text-center">
+          <h1 className="text-3xl font-semibold text-white mb-8 tracking-tight">Login</h1>
 
           <form onSubmit={handleLogin} className="space-y-5">
             {error && (
-              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-xl border border-destructive/20">
+              <div className="bg-red-500/15 text-red-400 text-sm p-3 rounded-xl border border-red-500/20">
                 {error}
               </div>
             )}
 
             <div className="space-y-2 text-left">
-              <label htmlFor="name" className="text-sm font-medium text-slate-600">
+              <label htmlFor="name" className="text-sm font-medium text-slate-300">
                 Email or Name
               </label>
               <Input
@@ -154,12 +154,12 @@ export default function LoginPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={loading}
-                className="h-12 rounded-xl text-base bg-white/80 border-slate-200 hover:border-blue-300 focus-visible:ring-2 focus-visible:ring-blue-400/40 transition-all duration-200 text-slate-900 placeholder:text-slate-400"
+                className="h-12 rounded-xl text-base bg-slate-800/80 border-slate-600 hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-all duration-200 text-white placeholder:text-slate-500"
               />
             </div>
 
             <div className="space-y-2 text-left">
-              <label htmlFor="password" className="text-sm font-medium text-slate-600">
+              <label htmlFor="password" className="text-sm font-medium text-slate-300">
                 Password
               </label>
               <div className="relative">
@@ -170,12 +170,12 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="h-12 rounded-xl text-base pr-12 bg-white/80 border-slate-200 hover:border-blue-300 focus-visible:ring-2 focus-visible:ring-blue-400/40 transition-all duration-200 text-slate-900 placeholder:text-slate-400"
+                  className="h-12 rounded-xl text-base pr-12 bg-slate-800/80 border-slate-600 hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-all duration-200 text-white placeholder:text-slate-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors duration-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200"
                   tabIndex={-1}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -186,7 +186,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-12 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:shadow-blue-500/30"
+              className="w-full h-12 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all duration-200"
               disabled={loading}
             >
               {loading ? "Signing in..." : "Login"}
@@ -195,10 +195,10 @@ export default function LoginPage() {
 
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
+              <div className="w-full border-t border-slate-700" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-transparent px-4 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <span className="bg-slate-900 px-4 text-xs font-medium uppercase tracking-wider text-slate-500">
                 Or login with
               </span>
             </div>
@@ -207,7 +207,7 @@ export default function LoginPage() {
           <div className="flex gap-3">
             <Button
               variant="outline"
-              className="flex-1 h-12 rounded-xl border-slate-200 bg-white/60 hover:bg-white/80 transition-all duration-200 text-slate-700"
+              className="flex-1 h-12 rounded-xl border-slate-600 bg-slate-800/50 hover:bg-slate-800 transition-all duration-200 text-slate-300"
               type="button"
               disabled
             >
@@ -233,7 +233,7 @@ export default function LoginPage() {
             </Button>
             <Button
               variant="outline"
-              className="flex-1 h-12 rounded-xl border-slate-200 bg-white/60 hover:bg-white/80 transition-all duration-200 text-slate-700"
+              className="flex-1 h-12 rounded-xl border-slate-600 bg-slate-800/50 hover:bg-slate-800 transition-all duration-200 text-slate-300"
               type="button"
               disabled
             >

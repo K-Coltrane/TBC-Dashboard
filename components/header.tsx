@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Bell, Settings, User, Mail, HelpCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -23,19 +24,19 @@ export function Header() {
   ])
 
   return (
-    <header className="h-16 bg-card border-b border-border px-6 flex items-center justify-between shadow-sm">
+    <header className="h-14 lg:h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
       <div className="flex-1">
-        <h2 className="text-2xl font-bold text-foreground">Dashboard</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Dashboard</h2>
       </div>
 
       <div className="flex items-center gap-3">
         {/* Notifications */}
         <DropdownMenu open={notificationsOpen} onOpenChange={setNotificationsOpen}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5 text-foreground" />
+            <Button variant="ghost" size="icon" className="relative hover:bg-slate-100">
+              <Bell className="w-5 h-5 text-slate-600" />
               {notifications.length > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full border-2 border-card" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
               )}
             </Button>
           </DropdownMenuTrigger>
@@ -64,24 +65,30 @@ export function Header() {
         {/* Settings */}
         <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Settings className="w-5 h-5 text-foreground" />
+            <Button variant="ghost" size="icon" className="hover:bg-slate-100">
+              <Settings className="w-5 h-5 text-slate-600" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>Settings</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Settings className="w-4 h-4 mr-2" />
-              General Settings
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings" onClick={() => setSettingsOpen(false)}>
+                <Settings className="w-4 h-4 mr-2" />
+                General Settings
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Mail className="w-4 h-4 mr-2" />
-              Email Preferences
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings#email" onClick={() => setSettingsOpen(false)}>
+                <Mail className="w-4 h-4 mr-2" />
+                Email Preferences
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <HelpCircle className="w-4 h-4 mr-2" />
-              Help & Support
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings#help" onClick={() => setSettingsOpen(false)}>
+                <HelpCircle className="w-4 h-4 mr-2" />
+                Help & Support
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -89,25 +96,31 @@ export function Header() {
         {/* Profile */}
         <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <User className="w-5 h-5 text-foreground" />
+            <Button variant="ghost" size="icon" className="hover:bg-slate-100">
+              <User className="w-5 h-5 text-slate-600" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="w-4 h-4 mr-2" />
-              Profile
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings" onClick={() => setProfileOpen(false)}>
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="w-4 h-4 mr-2" />
-              Account Settings
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings" onClick={() => setProfileOpen(false)}>
+                <Settings className="w-4 h-4 mr-2" />
+                Account Settings
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <HelpCircle className="w-4 h-4 mr-2" />
-              Help Center
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings#help" onClick={() => setProfileOpen(false)}>
+                <HelpCircle className="w-4 h-4 mr-2" />
+                Help Center
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

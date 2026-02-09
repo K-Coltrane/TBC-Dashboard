@@ -29,10 +29,10 @@ export function DeleteConfirmDialog({ open, onOpenChange, onConfirm, itemName, i
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-slate-200 text-slate-700 hover:bg-slate-100">
             Cancel
           </Button>
-          <Button variant="destructive" onClick={onConfirm}>
+          <Button onClick={onConfirm} className="bg-blue-600 hover:bg-blue-700 text-white">
             Delete
           </Button>
         </DialogFooter>

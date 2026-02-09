@@ -569,6 +569,104 @@ export class SupabaseService {
     const { error } = await supabase.from('members').delete().eq('id', id)
     if (error) throw error
   }
+
+  // ==================== RECENT ACTIVITY ====================
+  async getRecentActivity(limit = 15): Promise<
+    Array<{
+      id: string
+      type: 'member' | 'visitor' | 'attendance'
+      userName: string
+      action: string
+      timestamp: string
+      sortKey: number
+    }>
+  > {
+    try {
+      const [members, visitors, attendance] = await Promise.all([
+        supabase.from('members').select('id, name, created_at').order('created_at', { ascending: false }).limit(5),
+        supabase.from('visitors').select('id, first_name, last_name, created_at').order('created_at', { ascending: false }).limit(5),
+        supabase
+          .from('attendance')
+          .select('id, checked_in_at, visitors(first_name, last_name), services(service_types(name))')
+          .order('checked_in_at', { ascending: false })
+          .limit(5),
+      ])
+
+      const activities: Array<{
+        id: string
+        type: 'member' | 'visitor' | 'attendance'
+        userName: string
+        action: string
+        timestamp: string
+        sortKey: number
+      }> = []
+
+      const formatName = (first: string, last?: string) => {
+        if (first && last) return `${first} ${last}`.trim()
+        if (first) return first
+        return 'Unknown'
+      }
+
+      const formatTimeAgo = (dateStr: string) => {
+        const date = new Date(dateStr)
+        const now = new Date()
+        const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+        if (seconds < 60) return 'Just now'
+        if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`
+        if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`
+        return date.toLocaleDateString()
+      }
+
+      ;(members.data || []).forEach((m: any) => {
+        const name = m.name || 'Unknown'
+        const parts = name.split(' ')
+        const firstName = parts[0] || ''
+        const lastName = parts.slice(1).join(' ') || ''
+        activities.push({
+          id: `member-${m.id}`,
+          type: 'member',
+          userName: formatName(firstName, lastName) || name,
+          action: 'joined as member',
+          timestamp: formatTimeAgo(m.created_at || new Date().toISOString()),
+          sortKey: new Date(m.created_at || 0).getTime(),
+        })
+      })
+
+      ;(visitors.data || []).forEach((v: any) => {
+        activities.push({
+          id: `visitor-${v.id}`,
+          type: 'visitor',
+          userName: formatName(v.first_name, v.last_name),
+          action: 'registered as visitor',
+          timestamp: formatTimeAgo(v.created_at || new Date().toISOString()),
+          sortKey: new Date(v.created_at || 0).getTime(),
+        })
+      })
+
+      ;(attendance.data || []).forEach((a: any) => {
+        const visitor = a.visitors
+        const service = a.services
+        const serviceName = service?.service_types?.name || 'service'
+        const userName = visitor ? formatName(visitor.first_name, visitor.last_name) : 'Someone'
+        activities.push({
+          id: `attendance-${a.id}`,
+          type: 'attendance',
+          userName,
+          action: `attended ${serviceName}`,
+          timestamp: formatTimeAgo(a.checked_in_at || new Date().toISOString()),
+          sortKey: new Date(a.checked_in_at || 0).getTime(),
+        })
+      })
+
+      return activities
+        .sort((a, b) => b.sortKey - a.sortKey)
+        .slice(0, limit)
+    } catch (error) {
+      console.error('Error fetching recent activity:', error)
+      return []
+    }
+  }
 }
 
 export const supabaseService = new SupabaseService()

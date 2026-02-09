@@ -494,7 +494,7 @@ export default function VisitorsPage() {
                               <span>{promotingVisitorId === visitor.id ? "Promoting..." : "Promote to Member"}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="gap-2 text-destructive" 
+                              className="gap-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100" 
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleDelete(visitor.id)

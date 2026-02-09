@@ -169,7 +169,7 @@ export default function ServiceTypesPage() {
                                 <Edit2 className="w-4 h-4" />
                                 <span>Edit</span>
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2 text-destructive" onClick={() => handleDelete(type.id)}>
+                              <DropdownMenuItem className="gap-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100" onClick={() => handleDelete(type.id)}>
                                 <Trash2 className="w-4 h-4" />
                                 <span>Delete</span>
                               </DropdownMenuItem>

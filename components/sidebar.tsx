@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
-import { BarChart3, Users, UserCheck, Zap, Calendar, Settings, LogOut, LayoutDashboard, ChevronLeft, ChevronRight } from "lucide-react"
+import { Users, UserCheck, Zap, Calendar, Settings, LogOut, LayoutDashboard, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Dialog,
@@ -64,23 +64,33 @@ export function Sidebar() {
       href: "/dashboard/service-types",
       icon: Settings,
     },
+    {
+      label: "Settings",
+      href: "/dashboard/settings",
+      icon: SlidersHorizontal,
+    },
   ]
 
   return (
     <aside className={cn(
-      "relative bg-gradient-to-b from-sidebar to-sidebar/95 border-r border-sidebar-border/50 h-screen flex flex-col shadow-xl transition-all duration-300",
-      isCollapsed ? "w-20" : "w-72"
+      "relative bg-slate-900/98 backdrop-blur-sm border-r border-slate-700/50 h-screen flex flex-col transition-all duration-300 ease-out rounded-r-2xl shrink-0",
+      isCollapsed ? "w-[72px]" : "w-64"
     )}>
-      {/* Logo Section */}
-      <div className={cn(
-        "border-b border-sidebar-border/50 bg-gradient-to-r from-sidebar-accent/20 to-transparent transition-all duration-300",
-        isCollapsed ? "p-4" : "p-6"
-      )}>
+      {/* Logo Section - Click to collapse/expand */}
+      <button
+        type="button"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className={cn(
+          "w-full border-b border-slate-700/50 bg-slate-800/50 transition-all duration-300 text-left cursor-pointer hover:bg-slate-800/80 active:scale-[0.99]",
+          isCollapsed ? "p-4" : "p-5"
+        )}
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
         <div className={cn(
           "flex items-center gap-4 transition-all duration-300",
           isCollapsed ? "justify-center" : ""
         )}>
-          <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-background shadow-lg ring-2 ring-primary/20 flex-shrink-0">
+          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-800 ring-1 ring-slate-600 flex-shrink-0">
             <Image
               src="/Logo.jpg"
               alt="Church Logo"
@@ -91,33 +101,15 @@ export function Sidebar() {
           </div>
           {!isCollapsed && (
             <div className="transition-opacity duration-300">
-              <h1 className="text-lg font-bold text-sidebar-foreground leading-tight">Church Admin</h1>
-              <p className="text-xs text-sidebar-foreground/60 font-medium">Management Portal</p>
+              <h1 className="text-base font-semibold text-white leading-tight">Church Admin</h1>
+              <p className="text-xs text-slate-400 font-medium">Management Portal</p>
             </div>
           )}
         </div>
-      </div>
-
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute top-20 -right-3 z-10 w-6 h-6 rounded-full bg-sidebar border-2 border-sidebar-border shadow-md flex items-center justify-center text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
-        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        {isCollapsed ? (
-          <ChevronRight className="w-4 h-4" />
-        ) : (
-          <ChevronLeft className="w-4 h-4" />
-        )}
       </button>
 
       {/* Navigation Items */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto relative">
-        {!isCollapsed && (
-          <div className="px-2 py-2 mb-2">
-            <p className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider">Navigation</p>
-          </div>
-        )}
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto relative">
         {menuItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
@@ -126,35 +118,30 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center gap-3 rounded-xl transition-all duration-200 relative",
+                "group flex items-center gap-3 rounded-lg transition-all duration-200 relative",
                 isActive
-                  ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-                isCollapsed ? "justify-center px-3 py-3" : "px-4 py-3"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-slate-300 hover:bg-slate-800/80 hover:text-white",
+                isCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5"
               )}
               title={isCollapsed ? item.label : undefined}
             >
               {isActive && !isCollapsed && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-foreground rounded-r-full" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-white rounded-r-full" />
               )}
               <div
                 className={cn(
-                  "flex items-center justify-center rounded-lg transition-all flex-shrink-0",
+                  "flex items-center justify-center rounded-md transition-all flex-shrink-0",
                   isActive
-                    ? "bg-primary-foreground/20 text-primary-foreground"
-                    : "bg-sidebar-accent/30 text-sidebar-foreground/70 group-hover:bg-sidebar-accent/50 group-hover:text-sidebar-foreground",
-                  isCollapsed ? "w-10 h-10" : "w-8 h-8"
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-800/50 text-slate-400 group-hover:bg-slate-700 group-hover:text-white",
+                  isCollapsed ? "w-9 h-9" : "w-8 h-8"
                 )}
               >
                 <Icon className="w-4 h-4" />
               </div>
               {!isCollapsed && (
-                <>
-                  <span className={cn("font-medium text-sm whitespace-nowrap", isActive && "font-semibold")}>{item.label}</span>
-                  {isActive && (
-                    <div className="ml-auto w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
-                  )}
-                </>
+                <span className={cn("font-medium text-sm whitespace-nowrap", isActive && "font-semibold")}>{item.label}</span>
               )}
             </Link>
           )
@@ -162,26 +149,23 @@ export function Sidebar() {
       </nav>
 
       {/* Logout Button */}
-      <div className={cn(
-        "border-t border-sidebar-border/50 bg-gradient-to-r from-sidebar-accent/10 to-transparent transition-all duration-300",
-        isCollapsed ? "p-4" : "p-4"
-      )}>
+      <div className="border-t border-slate-700/50 p-3">
         <button
           onClick={() => setLogoutOpen(true)}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl text-sidebar-foreground/80 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 group",
-            isCollapsed ? "justify-center px-3 py-3" : "px-4 py-3"
+            "w-full flex items-center gap-3 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group",
+            isCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5"
           )}
           title={isCollapsed ? "Logout" : undefined}
         >
           <div className={cn(
-            "flex items-center justify-center rounded-lg bg-destructive/10 text-destructive/70 group-hover:bg-destructive/20 group-hover:text-destructive transition-all flex-shrink-0",
-            isCollapsed ? "w-10 h-10" : "w-8 h-8"
+            "flex items-center justify-center rounded-md bg-slate-800/50 text-slate-500 group-hover:bg-red-500/20 group-hover:text-red-400 transition-all flex-shrink-0",
+            isCollapsed ? "w-9 h-9" : "w-8 h-8"
           )}>
             <LogOut className="w-4 h-4" />
           </div>
           {!isCollapsed && (
-            <span className="font-medium text-sm group-hover:font-semibold">Logout</span>
+            <span className="font-medium text-sm">Logout</span>
           )}
         </button>
       </div>
@@ -196,10 +180,10 @@ export function Sidebar() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLogoutOpen(false)}>
+            <Button variant="outline" onClick={() => setLogoutOpen(false)} className="border-slate-200 text-slate-700 hover:bg-slate-100">
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleLogout}>
+            <Button onClick={handleLogout} className="bg-blue-600 hover:bg-blue-700 text-white">
               Logout
             </Button>
           </DialogFooter>

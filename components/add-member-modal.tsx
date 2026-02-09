@@ -183,10 +183,10 @@ export function AddMemberModal({ open, onOpenChange, onAddMember }: AddMemberMod
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-slate-200 text-slate-700 hover:bg-slate-100">
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Add Member</Button>
+          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white">Add Member</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
