@@ -4,8 +4,18 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Users, Calendar, UserCheck, Zap, UserPlus, Activity } from "lucide-react"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Users, Calendar, UserCheck, Zap, UserPlus, Activity, BarChart3 } from "lucide-react"
 import { supabaseService } from "@/lib/supabaseService"
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  AreaChart,
+  Area,
+} from "recharts"
 
 interface ActivityItem {
   id: string
@@ -21,8 +31,11 @@ export default function DashboardPage() {
   const [visitorsThisMonth, setVisitorsThisMonth] = useState<number>(0)
   const [attendanceRate, setAttendanceRate] = useState<number>(0)
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
+  const [attendanceByDay, setAttendanceByDay] = useState<Array<{ date: string; count: number }>>([])
+  const [visitorsByWeek, setVisitorsByWeek] = useState<Array<{ week: string; count: number }>>([])
   const [loading, setLoading] = useState(true)
   const [activityLoading, setActivityLoading] = useState(true)
+  const [chartsLoading, setChartsLoading] = useState(true)
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -71,7 +84,33 @@ export default function DashboardPage() {
     loadRecentActivity()
   }, [])
 
+  useEffect(() => {
+    const loadChartData = async () => {
+      try {
+        const [attendance, visitors] = await Promise.all([
+          supabaseService.getAttendanceByDay(14),
+          supabaseService.getVisitorsByWeek(6),
+        ])
+        setAttendanceByDay(attendance)
+        setVisitorsByWeek(visitors)
+      } catch (error) {
+        console.error("Error loading chart data:", error)
+      } finally {
+        setChartsLoading(false)
+      }
+    }
+    loadChartData()
+  }, [])
+
   const formatNumber = (num: number) => num.toLocaleString()
+  const formatShortDate = (s: string) => {
+    const d = new Date(s)
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  }
+  const formatShortWeek = (s: string) => {
+    const d = new Date(s)
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  }
 
   const stats = [
     {
@@ -161,6 +200,79 @@ export default function DashboardPage() {
               </Card>
             )
           })}
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-slate-600" />
+                Attendance (Last 14 Days)
+              </CardTitle>
+              <CardDescription>Daily check-ins</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {chartsLoading ? (
+                <Skeleton className="h-[280px] w-full" />
+              ) : attendanceByDay.length > 0 ? (
+                <ChartContainer
+                  config={{
+                    count: { label: "Check-ins", color: "#3b82f6" },
+                  }}
+                  className="h-[280px] w-full"
+                >
+                  <BarChart data={attendanceByDay.map((d) => ({ ...d, label: formatShortDate(d.date) }))} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200" />
+                    <XAxis dataKey="label" tick={{ fill: "#64748b", fontSize: 11 }} />
+                    <YAxis tick={{ fill: "#64748b", fontSize: 11 }} allowDecimals={false} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ChartContainer>
+              ) : (
+                <div className="h-[280px] flex items-center justify-center text-slate-500 text-sm">No attendance data yet</div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-slate-600" />
+                New Visitors (Last 6 Weeks)
+              </CardTitle>
+              <CardDescription>Weekly visitor registrations</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {chartsLoading ? (
+                <Skeleton className="h-[280px] w-full" />
+              ) : visitorsByWeek.length > 0 ? (
+                <ChartContainer
+                  config={{
+                    count: { label: "Visitors", color: "#8b5cf6" },
+                  }}
+                  className="h-[280px] w-full"
+                >
+                  <AreaChart data={visitorsByWeek.map((d) => ({ ...d, label: formatShortWeek(d.week) }))} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="visitorsGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200" />
+                    <XAxis dataKey="label" tick={{ fill: "#64748b", fontSize: 11 }} />
+                    <YAxis tick={{ fill: "#64748b", fontSize: 11 }} allowDecimals={false} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Area type="monotone" dataKey="count" stroke="#8b5cf6" fill="url(#visitorsGradient)" strokeWidth={2} />
+                  </AreaChart>
+                </ChartContainer>
+              ) : (
+                <div className="h-[280px] flex items-center justify-center text-slate-500 text-sm">No visitor data yet</div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="border-0 shadow-sm bg-white overflow-hidden">

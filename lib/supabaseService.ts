@@ -570,6 +570,103 @@ export class SupabaseService {
     if (error) throw error
   }
 
+  // ==================== DASHBOARD CHARTS ====================
+  async getAttendanceByDay(days = 14): Promise<Array<{ date: string; count: number }>> {
+    try {
+      const start = new Date()
+      start.setDate(start.getDate() - days)
+      start.setHours(0, 0, 0, 0)
+      const { data, error } = await supabase
+        .from('attendance')
+        .select('checked_in_at')
+        .gte('checked_in_at', start.toISOString())
+
+      if (error) throw error
+
+      const byDate: Record<string, number> = {}
+      for (let i = 0; i < days; i++) {
+        const d = new Date(start)
+        d.setDate(d.getDate() + i)
+        byDate[d.toISOString().split('T')[0]] = 0
+      }
+      ;(data || []).forEach((r: any) => {
+        const date = (r.checked_in_at || '').split('T')[0]
+        if (date) byDate[date] = (byDate[date] ?? 0) + 1
+      })
+
+      return Object.entries(byDate)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, count]) => ({ date, count }))
+    } catch (error) {
+      console.error('Error fetching attendance by day:', error)
+      return []
+    }
+  }
+
+  async getVisitorsByWeek(weeks = 8): Promise<Array<{ week: string; count: number }>> {
+    try {
+      const start = new Date()
+      start.setDate(start.getDate() - weeks * 7)
+      start.setHours(0, 0, 0, 0)
+      const { data, error } = await supabase
+        .from('visitors')
+        .select('created_at')
+        .gte('created_at', start.toISOString())
+
+      if (error) throw error
+
+      const getWeekStart = (d: Date) => {
+        const mon = new Date(d)
+        mon.setDate(mon.getDate() - mon.getDay() + 1)
+        return mon.toISOString().split('T')[0]
+      }
+      const byWeek: Record<string, number> = {}
+      for (let i = 0; i < weeks; i++) {
+        const d = new Date(start)
+        d.setDate(d.getDate() + i * 7)
+        byWeek[getWeekStart(d)] = 0
+      }
+      ;(data || []).forEach((r: any) => {
+        const week = getWeekStart(new Date(r.created_at || 0))
+        if (byWeek[week] !== undefined) byWeek[week]++
+      })
+
+      return Object.entries(byWeek)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([week, count]) => ({ week, count }))
+    } catch (error) {
+      console.error('Error fetching visitors by week:', error)
+      return []
+    }
+  }
+
+  async getAttendanceByServiceType(limit = 6): Promise<Array<{ name: string; count: number }>> {
+    try {
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      const { data, error } = await supabase
+        .from('attendance')
+        .select('services(service_types(name))')
+        .gte('checked_in_at', thirtyDaysAgo.toISOString())
+
+      if (error) throw error
+
+      const byType: Record<string, number> = {}
+      ;(data || []).forEach((r: any) => {
+        const name = r.services?.service_types?.name || 'Unknown'
+        byType[name] = (byType[name] ?? 0) + 1
+      })
+
+      return Object.entries(byType)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit)
+    } catch (error) {
+      console.error('Error fetching attendance by service type:', error)
+      return []
+    }
+  }
+
   // ==================== RECENT ACTIVITY ====================
   async getRecentActivity(limit = 15): Promise<
     Array<{
